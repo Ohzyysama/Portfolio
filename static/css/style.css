@@ -238,3 +238,8 @@ footer {
         opacity: 0.75;
     }
 }
+
+ol {
+    padding-left: 1.5em;   /* 控制左缩进 */
+    margin-left: 0;         /* 或调整为你想要的值 */
+}
