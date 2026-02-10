@@ -15,19 +15,13 @@ my_profile = {
 posts =  [
     {
         "id": 1,
-        "title": "如何用 Flask 构建个人主页",
-        "date": "2023-10-24",
+        "title": "我的个人主页开张啦(附教程)",
+        "date": "2026-2-10",
         "summary": "这是我搭建这个网站的过程记录...",
         "tags": ["Python", "Web"],
-        "content": "<p>这是第一段正文。</p><p>这里可以写很长很长的详细内容...</p>"
-    },
-    {
-        "id": 2,
-        "title": "理解 Python 的虚拟环境",
-        "date": "2023-10-20",
-        "summary": "为什么 pip install 老是报错？venv 到底是什么？",
-        "tags": ["Python", "基础"],
-        "content": "<p>虚拟环境是 Python 开发中非常重要的概念。</p><ul><li>隔离依赖</li><li>避免冲突</li></ul>"
+        "content": "<p>网站的技术栈采用python + flask进行构建，部署在vercel服务器上（免费）。</p>"
+        "<p><strong>快速开始</strong></p>"
+        "<p>1.准备项目</p><p>2.将项目推送至GitHub</p><p>3.使用GitHub账号注册vercel并部署项目</p>"
     }
 ]
 
