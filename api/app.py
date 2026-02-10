@@ -3,7 +3,11 @@ import frontmatter
 import markdown
 from flask import Flask, render_template, url_for, abort
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="../templates",
+    static_folder="../static"
+)
 
 my_profile = {
     "name": "Chou",
@@ -16,7 +20,8 @@ my_profile = {
     ]
 }
 
-POSTS_DIR = os.path.join(os.path.dirname(__file__), "posts")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+POSTS_DIR = os.path.join(BASE_DIR, "..", "posts")
 
 def get_profile_with_avatar():
     profile = dict(my_profile)
@@ -47,15 +52,14 @@ def home():
 
 @app.route('/post/<post_id>')
 def post_detail(post_id):
-    profile = get_profile_with_avatar()
-    path = os.path.join(POSTS_DIR, f"{post_id}.md")
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "posts", f"{post_id}.md")
     if not os.path.exists(path):
         return "文章不存在", 404
 
     post = frontmatter.load(path)
     content = markdown.markdown(post.content, extensions=["fenced_code", "tables"])
 
-    return render_template('post.html', profile=profile, post={
+    return render_template('post.html', profile=get_profile_with_avatar(), post={
         "id": post_id,
         "title": post.get("title"),
         "date": post.get("date"),
@@ -63,6 +67,7 @@ def post_detail(post_id):
         "tags": post.get("tags", []),
         "content": content
     })
+
 
 if __name__ == '__main__':
     app.run(debug=True)
