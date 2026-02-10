@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }} - {{ profile.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="layout-container">
+        
+        <!-- 左侧：侧边栏 (可以直接复用) -->
+        <aside class="profile-card">
+            <div class="profile-header">
+                <img src="{{ profile.avatar }}" alt="Avatar" class="avatar">
+                <h1>{{ profile.name }}</h1>
+                <p class="title">{{ profile.title }}</p>
+            </div>
+            <p class="bio">{{ profile.bio }}</p>
+            
+            <!-- 加一个返回首页的按钮 -->
+            <div class="social-links">
+                <a href="{{ url_for('home') }}" class="btn" style="background:#333; color:#fff; border:none;">← 返回首页</a>
+            </div>
+        </aside>
+
+        <!-- 右侧：文章正文 -->
+        <main class="posts-feed">
+            <article class="post-card full-post">
+                <div class="post-meta">
+                    <span class="date">{{ post.date }}</span>
+                    <div class="tags">
+                        {% for tag in post.tags %}
+                        <span class="tag">#{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <h1 style="margin-bottom: 20px; font-size: 2rem;">{{ post.title }}</h1>
+                
+                <div class="post-content">
+                    {{ post.content | safe }}
+                </div>
+            </article>
+        </main>
+
+    </div>
+
+</body>
+</html>
