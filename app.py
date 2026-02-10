@@ -2,13 +2,10 @@ import os
 from flask import Flask, render_template, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask import request, redirect
-
+import markdown
 
 app = Flask(__name__)
 
-# =====================
-# 数据库配置
-# =====================
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
     'DATABASE_URL',
     'sqlite:///blog.db'
@@ -17,9 +14,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# =====================
-# 数据库模型（核心新增）
-# =====================
 class Post(db.Model):
     __tablename__ = 'posts'
 
@@ -32,9 +26,6 @@ class Post(db.Model):
     def __repr__(self):
         return f'<Post {self.title}>'
 
-# =====================
-# 你的个人信息（不动）
-# =====================
 my_profile = {
     "name": "Chou",
     "title": "NJU Software Engineering Drudge",
@@ -46,17 +37,11 @@ my_profile = {
     ]
 }
 
-# =====================
-# 工具函数
-# =====================
 def get_profile_with_avatar():
     profile = dict(my_profile)
     profile['avatar'] = url_for('static', filename='images/avatar.jpg')
     return profile
 
-# =====================
-# 路由（只改查询方式）
-# =====================
 @app.route('/')
 def home():
     profile = get_profile_with_avatar()
@@ -67,6 +52,10 @@ def home():
 def post_detail(post_id):
     profile = get_profile_with_avatar()
     post = Post.query.get_or_404(post_id)
+    post.content = markdown.markdown(
+        post.content,
+        extensions=['fenced_code', 'tables']
+    )
     return render_template('post.html', profile=profile, post=post)
 
 
@@ -93,9 +82,5 @@ def admin():
 
     return render_template('admin.html', profile=profile)
 
-
-# =====================
-# 本地启动
-# =====================
 if __name__ == '__main__':
     app.run(debug=True)
