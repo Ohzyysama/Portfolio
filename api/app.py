@@ -25,7 +25,7 @@ POSTS_DIR = os.path.join(BASE_DIR, "..", "posts")
 
 def get_profile_with_avatar():
     profile = dict(my_profile)
-    profile['avatar'] = url_for('static', filename='images/avatar.jpg')
+    profile['avatar'] = url_for('static', filename='images/avatar.png')
     return profile
 
 def load_posts():
