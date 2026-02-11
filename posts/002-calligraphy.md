@@ -2,9 +2,9 @@
 title: 福气满满
 date: 2026-2-11
 summary: 第一次写福字，且看效果如何
-tag:
-    -Chinese Calligraphy
-    -Chinese New Year
+tags:
+    - Chinese Calligraphy
+    - Chinese New Year
 ---
 
 **临危受命**<br>
