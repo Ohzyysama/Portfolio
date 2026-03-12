@@ -18,7 +18,7 @@ X ⊆ V(G) , Y = V(G)\X , E(X, Y) = {uv: uv ∈ E(G) and u ∈ X and v ∈ Y}, w
 2.2 若T不是生成树，则看∂(T)<br>
 2.2.1 若∂(T)为空，则G是不连通的<br>
 2.2.2 若∂(T)不为空，则树长大<br>
-**找生成树的方法**
+**找生成树的方法**<br>
 1.Breadth-First Search 广度优先搜索<br>
 2.Depth-First Search 深度优先搜索<br>
 Cayley's Formula: The number of labelled trees on n vertices is n^n-2<br>
