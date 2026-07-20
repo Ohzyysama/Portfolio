@@ -240,30 +240,120 @@ footer {
 }
 
 /* ===============================
-   合集区块
+   合集文件夹卡片
 ================================ */
-.series-section {
-    margin-bottom: 30px;
+.series-card {
+    display: block;
+    background: rgba(255,255,255,0.95);
+    padding: 22px 28px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s;
 }
 
-.series-title {
-    color: #555;
+.series-card:hover {
+    background: rgba(255,255,255,1);
+}
+
+.series-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.series-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #222;
+}
+
+.series-arrow {
+    color: #bbb;
     font-size: 1.1rem;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #e1e4e8;
 }
 
-.series-count {
-    font-size: 0.85rem;
-    color: #999;
-    font-weight: normal;
-}
-
-.post-series {
-    font-size: 0.9rem;
+.series-card:hover .series-arrow {
     color: #0070f3;
-    margin-bottom: 8px;
+}
+
+.series-card-bottom {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: #999;
+}
+
+.series-latest {
+    color: #bbb;
+}
+
+/* ===============================
+   合集内页
+================================ */
+.series-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.series-post-count {
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.page-heading {
+    font-size: 1.15rem;
+    color: #555;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+/* ===============================
+   面包屑 & 返回
+================================ */
+.post-breadcrumb {
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+}
+
+.post-breadcrumb a {
+    color: #888;
+    text-decoration: none;
+    border-bottom: 1px solid #ddd;
+}
+
+.post-breadcrumb a:hover {
+    color: #0070f3;
+    border-color: #0070f3;
+}
+
+.sidebar-back {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #eee;
+}
+
+.back-link {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.88rem;
+}
+
+.back-link:hover {
+    color: #333;
+}
+
+/* ===============================
+   文章内页
+================================ */
+.post-detail-title {
+    margin-bottom: 20px;
+    font-size: 2rem;
 }
 
 /* ===============================
@@ -279,25 +369,12 @@ footer {
 }
 
 /* ===============================
-   返回按钮
+   加载状态
 ================================ */
-.back-btn {
-    background: #333;
-    color: #fff !important;
-    border: none !important;
-}
-
-.back-btn:hover {
-    background: #0070f3 !important;
-}
-
-/* ===============================
-   加载/错误状态
-================================ */
-.loading {
+.loading-text {
     text-align: center;
     padding: 60px 0;
-    color: #888;
+    color: #aaa;
 }
 
 /* ===============================

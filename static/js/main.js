@@ -1,6 +1,5 @@
 /* ===============================
    Portfolio - Main JavaScript
-   Pure client-side rendering, no build step
 ================================ */
 
 const PROFILE_URL = '/profile.json';
@@ -8,29 +7,41 @@ const POSTS_INDEX_URL = '/posts/index.json';
 const POSTS_DIR = '/posts';
 
 let profile = null;
+let allPosts = null;
 
 // ==========================================
 // Init
 // ==========================================
 function init() {
+  handleRoute();
+  window.addEventListener('hashchange', handleRoute);
+}
+
+function handleRoute() {
   const hash = window.location.hash.slice(1);
-  if (hash) {
-    renderPost(hash);
-  } else {
+  if (!hash) {
     renderHome();
+    return;
   }
-  window.addEventListener('hashchange', () => {
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      renderPost(hash);
-    } else {
-      renderHome();
-    }
-  });
+  // #series/合集名 -> article list
+  if (hash.startsWith('series/')) {
+    const name = decodeURIComponent(hash.slice(7));
+    renderSeries(name);
+    return;
+  }
+  // #合集名/postId -> post detail
+  const slashIdx = hash.lastIndexOf('/');
+  if (slashIdx !== -1) {
+    const postId = hash.slice(slashIdx + 1);
+    renderPost(postId);
+    return;
+  }
+  // Old format: just postId -> try to redirect
+  renderPost(hash);
 }
 
 // ==========================================
-// Frontmatter Parser (pure JS, no lib)
+// Frontmatter Parser
 // ==========================================
 function parseFrontmatter(md) {
   const match = md.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
@@ -45,7 +56,6 @@ function parseFrontmatter(md) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
 
-    // List item: "- Value"
     if (trimmed.startsWith('- ') && currentKey) {
       if (!Array.isArray(data[currentKey])) {
         data[currentKey] = [];
@@ -54,7 +64,6 @@ function parseFrontmatter(md) {
       continue;
     }
 
-    // Key: Value or Key:
     const colonIdx = trimmed.indexOf(':');
     if (colonIdx !== -1) {
       currentKey = trimmed.slice(0, colonIdx).trim();
@@ -77,9 +86,70 @@ function escapeHtml(str) {
 }
 
 // ==========================================
-// Render Profile HTML
+// Fetch all posts metadata (cached)
 // ==========================================
-function renderProfileHTML(showBackBtn) {
+async function fetchAllPosts() {
+  if (allPosts) return allPosts;
+
+  const indexResp = await fetch(POSTS_INDEX_URL);
+  const postIds = await indexResp.json();
+
+  const posts = [];
+  for (const id of postIds) {
+    try {
+      const resp = await fetch(`${POSTS_DIR}/${id}.md`);
+      if (!resp.ok) { console.warn('Post not found:', id); continue; }
+      const md = await resp.text();
+      const { data } = parseFrontmatter(md);
+      posts.push({ id, ...data });
+    } catch (e) {
+      console.error('Failed to load post:', id, e);
+    }
+  }
+  allPosts = posts;
+  return posts;
+}
+
+// ==========================================
+// Group posts by series
+// ==========================================
+function groupBySeries(posts) {
+  const map = new Map();
+  const uncategorized = [];
+
+  for (const p of posts) {
+    if (p.series) {
+      if (!map.has(p.series)) map.set(p.series, []);
+      map.get(p.series).push(p);
+    } else {
+      uncategorized.push(p);
+    }
+  }
+
+  const sortByDate = (a, b) => new Date(b.date) - new Date(a.date);
+  for (const arr of map.values()) arr.sort(sortByDate);
+  uncategorized.sort(sortByDate);
+
+  // Sort groups: named series first by latest post date, uncategorized last
+  const entries = [...map.entries()].sort((a, b) =>
+    new Date(b[1][0].date) - new Date(a[1][0].date)
+  );
+
+  return { entries, uncategorized };
+}
+
+// ==========================================
+// Find post by id (from cached data)
+// ==========================================
+function findPost(postId) {
+  if (!allPosts) return null;
+  return allPosts.find(p => p.id === postId);
+}
+
+// ==========================================
+// Profile sidebar HTML
+// ==========================================
+function renderProfileHTML(backTo) {
   let html = `
     <div class="profile-header">
       <img src="${escapeHtml(profile.avatar)}" alt="Avatar" class="avatar">
@@ -95,11 +165,11 @@ function renderProfileHTML(showBackBtn) {
   }
   html += '</div>';
 
-  // Back button on post detail pages
-  if (showBackBtn) {
+  // Back link in sidebar
+  if (backTo) {
     html += `
-    <div class="social-links" style="margin-top:15px;">
-      <a href="#" class="btn back-btn">← 返回首页</a>
+    <div class="sidebar-back">
+      <a href="${escapeHtml(backTo)}" class="back-link">&larr; ${backTo === '#' ? '首页' : '合集列表'}</a>
     </div>`;
   }
 
@@ -107,13 +177,36 @@ function renderProfileHTML(showBackBtn) {
 }
 
 // ==========================================
-// Render Post Card (for list)
+// Series card (folder-style)
+// ==========================================
+function renderSeriesCard(name, posts) {
+  const count = posts.length;
+  const latestDate = posts[0].date;
+  const label = count === 1 ? '篇' : '篇';
+
+  return `
+    <a href="#series/${encodeURIComponent(name)}" class="series-card">
+      <div class="series-card-top">
+        <span class="series-name">${escapeHtml(name)}</span>
+        <span class="series-arrow">&rarr;</span>
+      </div>
+      <div class="series-card-bottom">
+        <span>${count} ${label}文章</span>
+        <span class="series-latest">最近更新 ${escapeHtml(latestDate)}</span>
+      </div>
+    </a>`;
+}
+
+// ==========================================
+// Post card (for article list)
 // ==========================================
 function renderPostCard(post) {
   let tagsHTML = '';
   if (Array.isArray(post.tags)) {
     tagsHTML = post.tags.map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join('');
   }
+
+  const seriesPrefix = post.series ? encodeURIComponent(post.series) + '/' : '';
 
   return `
     <article class="post-card">
@@ -122,144 +215,149 @@ function renderPostCard(post) {
         <div class="tags">${tagsHTML}</div>
       </div>
       <h3>
-        <a href="#${escapeHtml(post.id)}" class="post-title-link">
+        <a href="#${seriesPrefix}${escapeHtml(post.id)}" class="post-title-link">
           ${escapeHtml(post.title)}
         </a>
       </h3>
       <p>${escapeHtml(post.summary)}</p>
-      <a href="#${escapeHtml(post.id)}" class="read-more">阅读全文 →</a>
+      <a href="#${seriesPrefix}${escapeHtml(post.id)}" class="read-more">阅读全文 &rarr;</a>
     </article>`;
 }
 
 // ==========================================
-// Render Home Page
+// HOME: series folder list
 // ==========================================
 async function renderHome() {
   const app = document.getElementById('app');
-
-  // Show loading
-  app.innerHTML = '<div class="layout-container" style="justify-content:center;"><p>加载中...</p></div>';
+  app.innerHTML = '<div class="layout-container"><main class="posts-feed"><p class="loading-text">加载中...</p></main></div>';
 
   try {
-    // Fetch profile
-    const profileResp = await fetch(PROFILE_URL);
-    profile = await profileResp.json();
-
-    // Fetch post index
-    const indexResp = await fetch(POSTS_INDEX_URL);
-    const postIds = await indexResp.json();
-
-    // Fetch all posts and parse frontmatter
-    const postsMeta = [];
-    for (const id of postIds) {
-      try {
-        const resp = await fetch(`${POSTS_DIR}/${id}.md`);
-        if (!resp.ok) {
-          console.warn(`Post not found: ${id}`);
-          continue;
-        }
-        const md = await resp.text();
-        const { data } = parseFrontmatter(md);
-        postsMeta.push({ id, ...data });
-      } catch (e) {
-        console.error(`Failed to load post: ${id}`, e);
-      }
+    if (!profile) {
+      const resp = await fetch(PROFILE_URL);
+      profile = await resp.json();
     }
 
-    // Group by series
-    const seriesMap = new Map();
-    const uncategorized = [];
+    const posts = await fetchAllPosts();
+    const { entries, uncategorized } = groupBySeries(posts);
 
-    for (const post of postsMeta) {
-      if (post.series) {
-        if (!seriesMap.has(post.series)) {
-          seriesMap.set(post.series, []);
-        }
-        seriesMap.get(post.series).push(post);
-      } else {
-        uncategorized.push(post);
-      }
-    }
+    let html = '<h2 class="page-heading">文章合集</h2>';
 
-    // Sort within each group by date descending
-    const sortByDate = (a, b) => new Date(b.date) - new Date(a.date);
-    for (const posts of seriesMap.values()) {
-      posts.sort(sortByDate);
-    }
-    uncategorized.sort(sortByDate);
-
-    // Sort series groups by their latest post date
-    const seriesEntries = [...seriesMap.entries()].sort((a, b) => {
-      const aLatest = new Date(a[1][0].date);
-      const bLatest = new Date(b[1][0].date);
-      return bLatest - aLatest;
-    });
-
-    // Build posts HTML
-    let postsHTML = '';
-
-    for (const [seriesName, posts] of seriesEntries) {
-      postsHTML += `<section class="series-section">
-        <h2 class="series-title">📂 ${escapeHtml(seriesName)} <span class="series-count">(${posts.length}篇)</span></h2>`;
-      for (const post of posts) {
-        postsHTML += renderPostCard(post);
-      }
-      postsHTML += '</section>';
+    for (const [name, seriesPosts] of entries) {
+      html += renderSeriesCard(name, seriesPosts);
     }
 
     if (uncategorized.length > 0) {
-      postsHTML += `<section class="series-section">
-        <h2 class="series-title">📂 未分类 <span class="series-count">(${uncategorized.length}篇)</span></h2>`;
-      for (const post of uncategorized) {
-        postsHTML += renderPostCard(post);
-      }
-      postsHTML += '</section>';
+      html += renderSeriesCard('未分类', uncategorized);
     }
 
-    postsHTML += `<footer><p>&copy; 2026 ${escapeHtml(profile.name)}. Built with ❤️</p></footer>`;
+    html += `<footer><p>&copy; 2026 ${escapeHtml(profile.name)}</p></footer>`;
 
     app.innerHTML = `
       <div class="layout-container">
-        <aside class="profile-card">${renderProfileHTML(false)}</aside>
-        <main class="posts-feed">${postsHTML}</main>
+        <aside class="profile-card">${renderProfileHTML(null)}</aside>
+        <main class="posts-feed">${html}</main>
       </div>`;
 
   } catch (e) {
-    console.error('Failed to load page:', e);
-    app.innerHTML = '<div class="layout-container" style="justify-content:center;"><p>加载失败，请刷新重试。</p></div>';
+    console.error(e);
+    app.innerHTML = '<div class="layout-container"><main class="posts-feed"><p class="loading-text">加载失败，请刷新重试。</p></main></div>';
   }
 }
 
 // ==========================================
-// Render Single Post
+// SERIES: article list within a series
+// ==========================================
+async function renderSeries(name) {
+  const app = document.getElementById('app');
+  app.innerHTML = '<div class="layout-container"><main class="posts-feed"><p class="loading-text">加载中...</p></main></div>';
+
+  try {
+    if (!profile) {
+      const resp = await fetch(PROFILE_URL);
+      profile = await resp.json();
+    }
+
+    const posts = await fetchAllPosts();
+    const { entries, uncategorized } = groupBySeries(posts);
+
+    let seriesPosts;
+    if (name === '未分类') {
+      seriesPosts = uncategorized;
+    } else {
+      const entry = entries.find(([n]) => n === name);
+      seriesPosts = entry ? entry[1] : [];
+    }
+
+    if (seriesPosts.length === 0) {
+      app.innerHTML = `
+        <div class="layout-container">
+          <aside class="profile-card">${renderProfileHTML('#')}</aside>
+          <main class="posts-feed">
+            <div class="post-card"><p>该合集下暂无文章。</p></div>
+          </main>
+        </div>`;
+      return;
+    }
+
+    let html = `
+      <div class="series-header">
+        <h2 class="page-heading">${escapeHtml(name)}</h2>
+        <span class="series-post-count">共 ${seriesPosts.length} 篇</span>
+      </div>`;
+
+    for (const post of seriesPosts) {
+      html += renderPostCard(post);
+    }
+
+    app.innerHTML = `
+      <div class="layout-container">
+        <aside class="profile-card">${renderProfileHTML('#')}</aside>
+        <main class="posts-feed">${html}</main>
+      </div>`;
+
+  } catch (e) {
+    console.error(e);
+    app.innerHTML = '<div class="layout-container"><main class="posts-feed"><p class="loading-text">加载失败，请刷新重试。</p></main></div>';
+  }
+}
+
+// ==========================================
+// POST: single article detail
 // ==========================================
 async function renderPost(postId) {
   const app = document.getElementById('app');
-  app.innerHTML = '<div class="layout-container" style="justify-content:center;"><p>加载中...</p></div>';
+  app.innerHTML = '<div class="layout-container"><main class="posts-feed"><p class="loading-text">加载中...</p></main></div>';
 
   try {
-    // Fetch profile if not loaded
     if (!profile) {
-      const profileResp = await fetch(PROFILE_URL);
-      profile = await profileResp.json();
+      const resp = await fetch(PROFILE_URL);
+      profile = await resp.json();
     }
 
     const resp = await fetch(`${POSTS_DIR}/${postId}.md`);
-    if (!resp.ok) throw new Error('Post not found');
+    if (!resp.ok) throw new Error('Not found');
 
     const md = await resp.text();
     const { data, content } = parseFrontmatter(md);
 
-    // Render tags
+    // Build back link
+    let backTo = '#';
+    if (data.series) {
+      backTo = '#series/' + encodeURIComponent(data.series);
+    }
+
     let tagsHTML = '';
     if (Array.isArray(data.tags)) {
       tagsHTML = data.tags.map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join('');
     }
 
-    // Render markdown content
     const renderedContent = typeof marked !== 'undefined'
       ? marked.parse(content)
       : `<pre>${escapeHtml(content)}</pre>`;
+
+    const seriesLine = data.series
+      ? `<div class="post-breadcrumb"><a href="${backTo}">${escapeHtml(data.series)}</a></div>`
+      : '';
 
     const postHTML = `
       <article class="post-card full-post">
@@ -267,52 +365,45 @@ async function renderPost(postId) {
           <span class="date">${escapeHtml(data.date)}</span>
           <div class="tags">${tagsHTML}</div>
         </div>
-        ${data.series ? `<p class="post-series">📂 ${escapeHtml(data.series)}</p>` : ''}
-        <h1 style="margin-bottom: 20px; font-size: 2rem;">${escapeHtml(data.title)}</h1>
+        ${seriesLine}
+        <h1 class="post-detail-title">${escapeHtml(data.title)}</h1>
         <div class="post-content">${renderedContent}</div>
       </article>`;
 
     app.innerHTML = `
       <div class="layout-container">
-        <aside class="profile-card">${renderProfileHTML(true)}</aside>
+        <aside class="profile-card">${renderProfileHTML(backTo)}</aside>
         <main class="posts-feed">${postHTML}</main>
       </div>`;
 
-    // Bind back button
-    const backBtn = app.querySelector('.back-btn');
-    if (backBtn) {
-      backBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.location.hash = '';
-      });
-    }
-
     window.scrollTo(0, 0);
 
+    // Handle old-format URLs: redirect to new format
+    if (!window.location.hash.includes('/')) {
+      const newHash = backTo === '#' ? '' : data.series
+        ? encodeURIComponent(data.series) + '/' + postId
+        : postId;
+      if (newHash && '#' + newHash !== window.location.hash) {
+        window.location.replace('#' + newHash);
+      }
+    }
+
   } catch (e) {
-    console.error('Failed to load post:', e);
+    console.error(e);
     app.innerHTML = `
       <div class="layout-container">
         <main class="posts-feed" style="flex:1; text-align:center;">
           <div class="post-card">
             <h2>文章不存在</h2>
             <p style="margin-top:15px;">找不到该文章，可能已被删除。</p>
-            <a href="#" class="btn back-btn" style="display:inline-block; margin-top:20px; padding:8px 20px;">← 返回首页</a>
+            <p style="margin-top:10px;"><a href="#" class="read-more">&larr; 返回首页</a></p>
           </div>
         </main>
       </div>`;
-
-    const backBtn = app.querySelector('.back-btn');
-    if (backBtn) {
-      backBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.location.hash = '';
-      });
-    }
   }
 }
 
 // ==========================================
-// Start on DOM ready
+// Start
 // ==========================================
 document.addEventListener('DOMContentLoaded', init);
