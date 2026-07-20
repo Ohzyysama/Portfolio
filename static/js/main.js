@@ -262,7 +262,7 @@ async function renderHome() {
           </div>
           <h3><a href="${href}" class="post-title-link">${escapeHtml(post.title)}</a></h3>
           <p class="excerpt-text">${escapeHtml(excerpt)}${excerpt.length >= 280 ? '...' : ''}</p>
-          <a href="${href}" class="read-more">阅读全文 &rarr;</a>
+          <a href="${href}" class="read-more">阅读全文</a>
         </article>`;
     }
 
@@ -362,7 +362,7 @@ async function renderSeries(name) {
 
     let html = `
       <div class="series-detail-header">
-        <a href="#series/" class="back-link">&larr; 所有合集</a>
+        <a href="#series/" class="back-link">所有合集</a>
         <h2>${escapeHtml(name)} <span class="series-count">${seriesPosts.length} 篇</span></h2>
       </div>`;
 
@@ -381,7 +381,7 @@ async function renderSeries(name) {
           </div>
           <h3><a href="${href}" class="post-title-link">${escapeHtml(post.title)}</a></h3>
           <p>${escapeHtml(post.summary || '')}</p>
-          <a href="${href}" class="read-more">阅读全文 &rarr;</a>
+          <a href="${href}" class="read-more">阅读全文</a>
         </article>`;
     }
 
@@ -437,6 +437,9 @@ async function renderPost(postId) {
         ${breadcrumb}
         <h1 class="post-detail-title">${escapeHtml(post.title)}</h1>
         <div class="post-content">${rendered}</div>
+        <div class="post-return">
+          <a href="${backTo}">返回</a>
+        </div>
       </article>`;
 
     app.innerHTML = `
@@ -464,7 +467,7 @@ async function renderPost(postId) {
           <div class="excerpt-card">
             <h2>文章不存在</h2>
             <p style="margin-top:15px;">找不到该文章，可能已被删除。</p>
-            <p style="margin-top:10px;"><a href="#" class="read-more">&larr; 返回首页</a></p>
+            <p style="margin-top:10px;"><a href="#" class="read-more">返回首页</a></p>
           </div>
         </main>
       </div>`;
