@@ -1,0 +1,11 @@
+{
+  "name": "Chou",
+  "title": "NJU Software Engineering Drudge",
+  "bio": "努力生活中...",
+  "email": "231250040@smail.nju.edu.cn",
+  "avatar": "/static/images/avatar.png",
+  "social_links": [
+    {"name": "GitHub", "url": "https://github.com/Ohzyysama"},
+    {"name": "Gitee", "url": "https://gitee.com/ohzyysama"}
+  ]
+}

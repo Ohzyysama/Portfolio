@@ -1,6 +1,7 @@
 ---
 title: 现代图论第8讲
 date: 2026-4-23
+series: 现代图论
 summary: Edge Colorings of Graphs
 tags:
     - Graph Theory

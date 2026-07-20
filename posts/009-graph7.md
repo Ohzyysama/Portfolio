@@ -1,6 +1,7 @@
 ---
 title: 现代图论第7讲
 date: 2026-4-16
+series: 现代图论
 summary: Matchings in Graphs
 tags:
     - Graph Theory

@@ -239,7 +239,71 @@ footer {
     }
 }
 
+/* ===============================
+   合集区块
+================================ */
+.series-section {
+    margin-bottom: 30px;
+}
+
+.series-title {
+    color: #555;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e1e4e8;
+}
+
+.series-count {
+    font-size: 0.85rem;
+    color: #999;
+    font-weight: normal;
+}
+
+.post-series {
+    font-size: 0.9rem;
+    color: #0070f3;
+    margin-bottom: 8px;
+}
+
+/* ===============================
+   文章标题链接
+================================ */
+.post-title-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.post-title-link:hover {
+    color: #0070f3;
+}
+
+/* ===============================
+   返回按钮
+================================ */
+.back-btn {
+    background: #333;
+    color: #fff !important;
+    border: none !important;
+}
+
+.back-btn:hover {
+    background: #0070f3 !important;
+}
+
+/* ===============================
+   加载/错误状态
+================================ */
+.loading {
+    text-align: center;
+    padding: 60px 0;
+    color: #888;
+}
+
+/* ===============================
+   有序列表
+================================ */
 ol {
-    padding-left: 1.5em;   /* 控制左缩进 */
-    margin-left: 0;         /* 或调整为你想要的值 */
+    padding-left: 1.5em;
+    margin-left: 0;
 }

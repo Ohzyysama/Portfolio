@@ -1,6 +1,7 @@
 ---
 title: 现代图论第2讲
 date: 2026-3-12
+series: 现代图论
 summary: 图的连通性
 tags:
     - Graph Theory

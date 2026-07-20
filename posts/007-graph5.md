@@ -1,6 +1,7 @@
 ---
 title: 现代图论第5讲
 date: 2026-4-8
+series: 现代图论
 summary: Vertex Coloring of Graphs
 tags:
     - Graph Theory

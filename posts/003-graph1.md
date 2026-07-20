@@ -1,6 +1,7 @@
 ---
 title: 现代图论第1讲
 date: 2026-3-6
+series: 现代图论
 summary: 现代图论第1讲
 tags:
     - Graph Theory

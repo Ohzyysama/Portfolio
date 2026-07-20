@@ -1,6 +1,7 @@
 ---
 title: 现代图论第4讲
 date: 2026-3-26
+series: 现代图论
 summary: Hamilton Cycle
 tags:
     - Graph Theory

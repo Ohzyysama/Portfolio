@@ -1,6 +1,7 @@
 ---
 title: 福气满满
 date: 2026-2-11
+series: 日常
 summary: 第一次写福字，且看效果如何
 tags:
     - Chinese Calligraphy

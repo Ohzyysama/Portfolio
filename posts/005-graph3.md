@@ -1,6 +1,7 @@
 ---
 title: 现代图论第3讲
 date: 2026-3-18
+series: 现代图论
 summary: 最小生成树、最短路径、Hamilton Cycle
 tags:
     - Graph Theory

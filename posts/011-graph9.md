@@ -1,6 +1,7 @@
 ---
 title: 现代图论第9讲
 date: 2026-4-30
+series: 现代图论
 summary: Planar Graphs
 tags:
     - Graph Theory
