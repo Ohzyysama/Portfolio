@@ -88,15 +88,20 @@ function stripMarkdown(md) {
 async function fetchAllPosts() {
   if (allPosts) return allPosts;
   const resp = await fetch(POSTS_INDEX_URL);
+  if (!resp.ok) throw new Error(`Failed to load post index: ${resp.status}`);
   const ids = await resp.json();
   const posts = [];
+  let failed = 0;
   for (const id of ids) {
     try {
       const r = await fetch(`${POSTS_DIR}/${id}.md`);
-      if (!r.ok) continue;
+      if (!r.ok) { failed++; continue; }
       const { data } = parseFrontmatter(await r.text());
       posts.push({ id, ...data });
-    } catch (e) { console.warn('Post load fail:', id); }
+    } catch (e) { failed++; }
+  }
+  if (posts.length === 0 && ids.length > 0 && failed > 0) {
+    throw new Error(`无法加载文章 (${failed}/${ids.length} 篇失败)，请刷新重试。`);
   }
   allPosts = posts;
   return posts;
