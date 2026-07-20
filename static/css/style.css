@@ -29,7 +29,7 @@ body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: url("/static/images/bg.jpg") center / cover no-repeat;
+    background: url("../images/bg.jpg") center / cover no-repeat;
     filter: blur(20px);
     transform: scale(1.1);
     z-index: -2;
@@ -39,7 +39,7 @@ body::after {
     content: "";
     position: fixed;
     inset: 1vh 0.25vw;
-    background: url("/static/images/bg.jpg") center center / contain no-repeat;
+    background: url("../images/bg.jpg") center center / contain no-repeat;
     z-index: -1;
     opacity: 1;
 }

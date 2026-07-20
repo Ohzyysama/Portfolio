@@ -1,6 +1,6 @@
-const PROFILE_URL = '/profile.json';
-const POSTS_INDEX_URL = '/posts/index.json';
-const POSTS_DIR = '/posts';
+const PROFILE_URL = 'profile.json';
+const POSTS_INDEX_URL = 'posts/index.json';
+const POSTS_DIR = 'posts';
 
 let profile = null;
 let allPosts = null;

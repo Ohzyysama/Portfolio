@@ -3,7 +3,7 @@
   "title": "NJU Software Engineering Drudge",
   "bio": "努力生活中...",
   "email": "231250040@smail.nju.edu.cn",
-  "avatar": "/static/images/avatar.png",
+  "avatar": "static/images/avatar.png",
   "site_since": "2026-2-10",
   "social_links": [
     {"name": "GitHub", "url": "https://github.com/Ohzyysama"},

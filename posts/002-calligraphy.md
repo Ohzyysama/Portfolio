@@ -20,4 +20,4 @@ tags:
 苦心人，天不负，卧薪尝胆，三千越甲可吞吴。
 
 **成果展示**<br>
-<img src="/static/images/Fu.jpg" alt="福气满满" style="width: 50%;" />
+<img src="static/images/Fu.jpg" alt="福气满满" style="width: 50%;" />
