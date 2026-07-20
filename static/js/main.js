@@ -239,9 +239,8 @@ async function renderHome() {
     const posts = await fetchAllPosts();
     const { totalSeries } = groupBySeries(posts);
 
-    // Pick 4 random posts
-    const shuffled = [...posts].sort(() => Math.random() - 0.5);
-    const picked = shuffled.slice(0, Math.min(4, posts.length));
+    // Show 10 most recent posts
+    const picked = posts.slice(0, 10);
 
     // Fetch full content for picked posts
     const fullPosts = await Promise.all(picked.map(p => fetchPostWithContent(p.id).catch(() => null)));
